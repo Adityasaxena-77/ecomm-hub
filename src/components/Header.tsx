@@ -18,8 +18,8 @@ const Header = () => {
             <span className="text-xl md:text-2xl font-heading font-bold text-primary-foreground tracking-tight">
               Ecommerce Platform
             </span>
-            <span className="hidden md:block text-[10px] text-primary-foreground/70 italic -mt-2">
-              Explore <span className="text-accent-foreground font-medium">Plus</span>
+            <span className="hidden md:block text-[10px] italic -mt-2">
+              <span className="text-primary-foreground/70">Explore </span><span className="font-medium" style={{ color: "hsl(0, 80%, 70%)" }}>Plus</span>
             </span>
           </div>
 
