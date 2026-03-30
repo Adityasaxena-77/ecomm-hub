@@ -3,13 +3,35 @@ import { Button } from "@/components/ui/button";
 import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const ProductCard = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
   const [liked, setLiked] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToCart(product);
+    toast.success("Added to cart!", {
+      description: `${product.name} • ₹${product.price.toLocaleString()}`,
+    });
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLiked(!liked);
+    toast(liked ? "Removed from wishlist" : "Added to wishlist ❤️", {
+      description: product.name,
+    });
+  };
 
   return (
-    <div className="bg-card rounded-lg card-shadow hover:card-shadow-hover transition-all duration-300 group overflow-hidden flex flex-col">
+    <div
+      className="bg-card rounded-lg card-shadow hover:card-shadow-hover transition-all duration-300 group overflow-hidden flex flex-col cursor-pointer"
+      onClick={() => navigate(`/product/${product.id}`)}
+    >
       {/* Image */}
       <div className="relative overflow-hidden aspect-square bg-secondary">
         <img
@@ -24,7 +46,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           </span>
         )}
         <button
-          onClick={() => setLiked(!liked)}
+          onClick={handleWishlist}
           className="absolute top-2 right-2 h-8 w-8 rounded-full bg-card/80 backdrop-blur flex items-center justify-center hover:bg-card transition-colors"
         >
           <Heart className={`h-4 w-4 ${liked ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
@@ -56,7 +78,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           variant="outline"
           size="sm"
           className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-          onClick={() => addToCart(product)}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
           Add to Cart
