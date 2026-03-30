@@ -2,11 +2,13 @@ import { Search, ShoppingCart, User, Menu, Heart, ChevronDown } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import { useSearch } from "@/context/SearchContext";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const { totalItems, setIsCartOpen } = useCart();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery } = useSearch();
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-50 bg-card card-shadow">
@@ -14,7 +16,7 @@ const Header = () => {
       <div className="hero-gradient">
         <div className="container flex items-center justify-between py-3 gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 cursor-pointer" onClick={() => navigate("/")}>
             <span className="text-xl md:text-2xl font-heading font-bold text-primary-foreground tracking-tight">
               Ecommerce Platform
             </span>

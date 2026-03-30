@@ -1,9 +1,17 @@
 import { products } from "@/data/products";
-import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/CartContext";
 import { Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const DealsStrip = () => {
   const deals = products.filter((p) => p.discount >= 55).slice(0, 4);
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  const handleDealClick = (product: typeof products[0]) => {
+    navigate(`/product/${product.id}`);
+  };
 
   return (
     <section className="bg-card py-6 border-y border-border">
@@ -15,7 +23,11 @@ const DealsStrip = () => {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {deals.map((product) => (
-            <div key={product.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer">
+            <div
+              key={product.id}
+              onClick={() => handleDealClick(product)}
+              className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+            >
               <img src={product.image} alt={product.name} className="w-16 h-16 rounded-md object-cover shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground line-clamp-1">{product.name}</p>
