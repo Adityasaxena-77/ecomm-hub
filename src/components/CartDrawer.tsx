@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const CartDrawer = () => {
   const { items, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
+  const navigate = useNavigate();
 
   if (!isCartOpen) return null;
 
