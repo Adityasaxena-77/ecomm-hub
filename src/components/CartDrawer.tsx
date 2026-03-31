@@ -1,9 +1,11 @@
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const CartDrawer = () => {
   const { items, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
+  const navigate = useNavigate();
 
   if (!isCartOpen) return null;
 
@@ -65,7 +67,7 @@ const CartDrawer = () => {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-bold text-foreground">₹{totalPrice.toLocaleString()}</span>
             </div>
-            <Button variant="hero" size="lg" className="w-full">
+            <Button variant="hero" size="lg" className="w-full" onClick={() => { setIsCartOpen(false); navigate("/checkout"); }}>
               Checkout — ₹{totalPrice.toLocaleString()}
             </Button>
           </div>
