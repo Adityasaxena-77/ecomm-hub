@@ -67,7 +67,7 @@ const CartDrawer = () => {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-bold text-foreground">₹{totalPrice.toLocaleString()}</span>
             </div>
-            <Button variant="hero" size="lg" className="w-full">
+            <Button variant="hero" size="lg" className="w-full" onClick={() => { setIsCartOpen(false); navigate("/checkout"); }}>
               Checkout — ₹{totalPrice.toLocaleString()}
             </Button>
           </div>
