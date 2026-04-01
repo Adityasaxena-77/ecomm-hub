@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bot, Loader2, MessageCircle, Send, Sparkles, User, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,15 +45,6 @@ const Chatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const endRef = useRef<HTMLDivElement | null>(null);
-
-  const conversationPayload = useMemo(
-    () =>
-      messages.map(({ role, content }) => ({
-        role,
-        content,
-      })),
-    [messages],
-  );
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
