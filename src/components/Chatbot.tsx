@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bot, Loader2, MessageCircle, Send, Sparkles, User, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ const initialMessage: ChatMessage = {
 };
 
 const Chatbot = () => {
+  const { session } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +70,7 @@ const Chatbot = () => {
 
 
     const { data, error } = await supabase.functions.invoke("ecommerce-chatbot", {
+      headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       body: {
         message,
         history: nextMessages.map(({ role, content }) => ({ role, content })),
