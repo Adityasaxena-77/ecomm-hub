@@ -218,6 +218,8 @@ serve(async (req) => {
             totalAmount: Number(order.total_amount),
             createdAt: order.created_at,
           };
+        } else if (!order) {
+          orderTracking = null;
         }
       }
     }
