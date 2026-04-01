@@ -1,4 +1,4 @@
 project_id = "obnqgadvnspubewnfyev"
 
 [functions.ecommerce-chatbot]
-verify_jwt = true
+verify_jwt = false
