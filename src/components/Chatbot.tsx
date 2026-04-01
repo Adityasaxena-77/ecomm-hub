@@ -77,7 +77,6 @@ const Chatbot = () => {
         message,
         history: nextMessages.map(({ role, content }) => ({ role, content })),
       },
-      headers,
     });
 
     if (error) {
