@@ -183,8 +183,12 @@ serve(async (req) => {
     let userId: string | null = null;
 
     if (token) {
-      const { data: authData, error: authError } = await admin.auth.getUser(token);
-      if (!authError) userId = authData.user?.id ?? null;
+      try {
+        const { data: authData, error: authError } = await admin.auth.getUser(token);
+        if (!authError) userId = authData.user?.id ?? null;
+      } catch (_error) {
+        userId = null;
+      }
     }
 
     const faqKey = isFaqQuery(message);
