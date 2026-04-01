@@ -81,7 +81,8 @@ const Chatbot = () => {
     });
 
     if (error) {
-      toast.error("Chatbot is unavailable right now. Please try again.");
+      const errorMessage = typeof error.message === "string" ? error.message : "Chatbot is unavailable right now. Please try again.";
+      toast.error(errorMessage);
       setIsLoading(false);
       return;
     }
