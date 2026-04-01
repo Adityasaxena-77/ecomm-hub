@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 type ProductCard = {
@@ -39,7 +38,6 @@ const initialMessage: ChatMessage = {
 };
 
 const Chatbot = () => {
-  const { session } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,9 +66,6 @@ const Chatbot = () => {
     setIsLoading(true);
     scrollToBottom();
 
-    const headers = session?.access_token
-      ? { Authorization: `Bearer ${session.access_token}` }
-      : undefined;
 
     const { data, error } = await supabase.functions.invoke("ecommerce-chatbot", {
       body: {
