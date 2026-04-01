@@ -44,7 +44,7 @@ const Chatbot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
-  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const endRef = useRef<HTMLDivElement | null>(null);
 
   const conversationPayload = useMemo(
     () =>
@@ -57,8 +57,7 @@ const Chatbot = () => {
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
-      const viewport = viewportRef.current;
-      if (viewport) viewport.scrollTop = viewport.scrollHeight;
+      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     });
   };
 
@@ -85,7 +84,7 @@ const Chatbot = () => {
     const { data, error } = await supabase.functions.invoke("ecommerce-chatbot", {
       body: {
         message,
-        history: conversationPayload,
+        history: nextMessages.map(({ role, content }) => ({ role, content })),
       },
       headers,
     });
@@ -134,7 +133,7 @@ const Chatbot = () => {
           </div>
 
           <ScrollArea className="flex-1 bg-secondary/40">
-            <div ref={viewportRef} className="space-y-4 p-4">
+            <div className="space-y-4 p-4">
               {messages.map((message) => (
                 <div key={message.id} className={cn("flex gap-3", message.role === "user" && "justify-end")}>
                   {message.role === "assistant" && (
@@ -223,6 +222,7 @@ const Chatbot = () => {
                   </div>
                 </div>
               )}
+              <div ref={endRef} />
             </div>
           </ScrollArea>
 
