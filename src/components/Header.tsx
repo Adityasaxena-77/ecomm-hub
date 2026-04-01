@@ -61,6 +61,9 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <User className="h-4 w-4 mr-2" /> My Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/orders")}>
                     <Package className="h-4 w-4 mr-2" /> My Orders
                   </DropdownMenuItem>
