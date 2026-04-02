@@ -6,6 +6,7 @@ import { ArrowLeft, KeyRound, Mail, MapPin, Package, Phone, User } from "lucide-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import CurrentLocationButton from "@/components/CurrentLocationButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -208,6 +209,24 @@ const Profile = () => {
                         placeholder="Enter your phone number"
                       />
                     </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Use your current location</p>
+                      <p className="text-sm text-muted-foreground">Auto-fill your delivery address from this device.</p>
+                    </div>
+                    <CurrentLocationButton
+                      onLocationResolved={(location) =>
+                        setProfile((prev) => ({
+                          ...prev,
+                          address: location.address.slice(0, 250),
+                          city: location.city.slice(0, 80),
+                          state: location.state.slice(0, 80),
+                          pincode: location.pincode.slice(0, 20),
+                        }))
+                      }
+                    />
                   </div>
 
                   <div className="space-y-2">
