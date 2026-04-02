@@ -4,6 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import CurrentLocationButton from "@/components/CurrentLocationButton";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft, ShoppingBag, MapPin, CreditCard, Smartphone, CheckCircle2 } from "lucide-react";
@@ -140,9 +141,19 @@ const Checkout = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Address */}
             <div className="bg-card rounded-xl card-shadow p-6">
-              <h2 className="font-heading font-bold text-foreground flex items-center gap-2 mb-4">
-                <MapPin className="h-5 w-5 text-primary" /> Delivery Address
-              </h2>
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="font-heading font-bold text-foreground flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" /> Delivery Address
+                </h2>
+                <CurrentLocationButton
+                  onLocationResolved={(location) => {
+                    setAddress(location.address);
+                    setCity(location.city);
+                    setState(location.state);
+                    setPincode(location.pincode);
+                  }}
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input placeholder="Full Address" value={address} onChange={(e) => setAddress(e.target.value)} className="md:col-span-2" />
                 <Input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
