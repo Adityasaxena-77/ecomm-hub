@@ -178,8 +178,10 @@ const Auth = () => {
                   className="text-sm text-primary hover:underline"
                 >
                   {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
-            </button>
-          </div>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
