@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { LocateFixed, MapPin } from "lucide-react";
+import { LocateFixed } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import type { ResolvedLocation } from "@/hooks/useCurrentLocation";
-import LocationPickerModal from "@/components/LocationPickerModal";
 
 type CurrentLocationButtonProps = {
   onLocationResolved: (location: ResolvedLocation) => void;
@@ -12,29 +11,29 @@ type CurrentLocationButtonProps = {
 };
 
 const CurrentLocationButton = ({ onLocationResolved, className }: CurrentLocationButtonProps) => {
-  const [mapOpen, setMapOpen] = useState(false);
+  const { getCurrentLocation, loading } = useCurrentLocation();
+
+  const handleUseCurrentLocation = async () => {
+    try {
+      const location = await getCurrentLocation();
+      onLocationResolved(location);
+      toast.success("Current location selected successfully!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not get your current location");
+    }
+  };
 
   return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setMapOpen(true)}
-        className={cn("shrink-0", className)}
-      >
-        <MapPin className="h-4 w-4" />
-        Use Current Location
-      </Button>
-
-      <LocationPickerModal
-        open={mapOpen}
-        onClose={() => setMapOpen(false)}
-        onConfirm={(location) => {
-          onLocationResolved(location);
-          toast.success("Location selected successfully!");
-        }}
-      />
-    </>
+    <Button
+      type="button"
+      variant="outline"
+      onClick={() => void handleUseCurrentLocation()}
+      disabled={loading}
+      className={cn("shrink-0", className)}
+    >
+      <LocateFixed className={cn("h-4 w-4", loading && "animate-pulse")} />
+      {loading ? "Detecting Location..." : "Use Current Location"}
+    </Button>
   );
 };
 
