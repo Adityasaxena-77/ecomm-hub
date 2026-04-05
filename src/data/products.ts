@@ -38,7 +38,7 @@ export const products: Product[] = [
 ];
 
 export const bannerSlides = [
-  { id: 1, title: "Mega Electronics Sale", subtitle: "Up to 70% Off on Top Brands", cta: "Shop Now" },
-  { id: 2, title: "Fashion Week Special", subtitle: "New Arrivals at Unbeatable Prices", cta: "Explore" },
-  { id: 3, title: "Home Makeover Deals", subtitle: "Transform Your Space for Less", cta: "Discover" },
+  { id: 1, title: "Mega Electronics Sale", subtitle: "Up to 70% Off on Top Brands", cta: "Shop Now", category: "electronics" },
+  { id: 2, title: "Fashion Week Special", subtitle: "New Arrivals at Unbeatable Prices", cta: "Explore", category: "fashion" },
+  { id: 3, title: "Home Makeover Deals", subtitle: "Transform Your Space for Less", cta: "Discover", category: "home" },
 ];

@@ -117,7 +117,12 @@ const Header = () => {
             className="bg-secondary border-0 pr-10 h-9 text-sm"
             placeholder="Search for products..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (e.target.value.trim()) {
+                setTimeout(() => document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" }), 200);
+              }
+            }}
           />
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
         </div>
