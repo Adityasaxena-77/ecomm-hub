@@ -24,10 +24,8 @@ const ProductGrid = ({ title, filter }: { title: string; filter?: string }) => {
   // Apply search filter
   if (isSearching) {
     const query = searchQuery.toLowerCase();
-    filtered = filtered.filter(
-      (p) =>
-        p.name.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query)
+    filtered = filtered.filter((p) =>
+      p.name.toLowerCase().includes(query)
     );
   }
 
