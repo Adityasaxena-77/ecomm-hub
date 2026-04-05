@@ -59,7 +59,7 @@ const tokenize = (value: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter(Boolean);
+    .filter((t) => t.length >= 3); // Ignore very short tokens
 
 const detectBudget = (message: string) => {
   const underMatch = message.match(/(?:under|below|less than)\s*₹?\s*(\d{2,6})/i);
@@ -80,34 +80,57 @@ const searchProducts = (message: string) => {
   const budget = detectBudget(message);
   const terms = tokenize(message);
   const categoryHints: Record<string, string[]> = {
-    electronics: ["electronics", "headphone", "headphones", "watch", "charger", "charging", "tech", "gadget"],
-    fashion: ["fashion", "shirt", "tshirt", "t-shirt", "backpack", "bag", "clothes", "wear"],
+    electronics: ["electronics", "headphone", "headphones", "watch", "charger", "charging", "tech", "gadget", "earphone", "earphones"],
+    fashion: ["fashion", "shirt", "tshirt", "t-shirt", "backpack", "bag", "clothes", "wear", "clothing"],
     sports: ["sports", "shoe", "shoes", "running", "yoga", "fitness", "mat"],
     beauty: ["beauty", "serum", "skin", "skincare", "face"],
     home: ["home", "kitchen", "cookware", "bottle"],
-    books: ["book", "books", "novel"],
+    books: ["book", "books", "novel", "reading"],
     toys: ["toy", "toys", "blocks", "kids"],
   };
 
+  // Detect which category the user is asking about
+  let matchedCategory: string | null = null;
+  for (const [category, hints] of Object.entries(categoryHints)) {
+    if (hints.some((hint) => lower.includes(hint))) {
+      matchedCategory = category;
+      break;
+    }
+  }
+
   const scored = PRODUCT_CATALOG.map((product) => {
-    const haystack = `${product.name} ${product.category}`.toLowerCase();
-    let score = product.rating * 10 + Math.min(product.reviews / 5000, 10);
+    const nameLC = product.name.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+    const nameTokens = nameLC.split(/\s+/).filter((t) => t.length >= 2);
+    let nameMatch = 0;
+    let categoryMatch = 0;
 
+    // Term matching: check if search term starts with or is contained in name tokens
     for (const term of terms) {
-      if (haystack.includes(term)) score += 18;
+      for (const nt of nameTokens) {
+        if (nt.startsWith(term) || term.startsWith(nt)) {
+          nameMatch += 25;
+          break;
+        }
+      }
     }
 
-    for (const [category, hints] of Object.entries(categoryHints)) {
-      if (hints.some((hint) => lower.includes(hint)) && product.category === category) score += 24;
-    }
+    // Category match (weaker signal, only adds if name also matches or budget matches)
+    if (matchedCategory && product.category === matchedCategory) categoryMatch += 15;
 
-    if (budget && product.price <= budget) score += 22;
-    if (budget && product.price > budget) score -= Math.min((product.price - budget) / 100, 25);
-    if (/(best|top|recommended)/.test(lower)) score += product.rating * 3;
+    // Budget bonus
+    let budgetScore = 0;
+    if (budget && product.price <= budget) budgetScore += 10;
 
-    return { ...product, score };
+    // Product must have at least a name match OR (category match + budget match)
+    const relevanceScore = nameMatch > 0
+      ? nameMatch + categoryMatch + budgetScore + product.rating * 2
+      : (categoryMatch > 0 && budgetScore > 0)
+        ? categoryMatch + budgetScore + product.rating
+        : 0;
+
+    return { ...product, score: relevanceScore };
   })
-    .filter((product) => product.score > 18)
+    .filter((product) => product.score > 0)
     .sort((a, b) => b.score - a.score);
 
   const withinBudget = budget ? scored.filter((product) => product.price <= budget) : scored;
