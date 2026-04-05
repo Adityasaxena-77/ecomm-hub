@@ -59,7 +59,7 @@ const tokenize = (value: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter(Boolean);
+    .filter((t) => t.length >= 3); // Ignore very short tokens
 
 const detectBudget = (message: string) => {
   const underMatch = message.match(/(?:under|below|less than)\s*₹?\s*(\d{2,6})/i);
