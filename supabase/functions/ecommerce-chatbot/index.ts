@@ -80,34 +80,47 @@ const searchProducts = (message: string) => {
   const budget = detectBudget(message);
   const terms = tokenize(message);
   const categoryHints: Record<string, string[]> = {
-    electronics: ["electronics", "headphone", "headphones", "watch", "charger", "charging", "tech", "gadget"],
-    fashion: ["fashion", "shirt", "tshirt", "t-shirt", "backpack", "bag", "clothes", "wear"],
+    electronics: ["electronics", "headphone", "headphones", "watch", "charger", "charging", "tech", "gadget", "earphone", "earphones"],
+    fashion: ["fashion", "shirt", "tshirt", "t-shirt", "backpack", "bag", "clothes", "wear", "clothing"],
     sports: ["sports", "shoe", "shoes", "running", "yoga", "fitness", "mat"],
     beauty: ["beauty", "serum", "skin", "skincare", "face"],
     home: ["home", "kitchen", "cookware", "bottle"],
-    books: ["book", "books", "novel"],
+    books: ["book", "books", "novel", "reading"],
     toys: ["toy", "toys", "blocks", "kids"],
   };
 
+  // Detect which category the user is asking about
+  let matchedCategory: string | null = null;
+  for (const [category, hints] of Object.entries(categoryHints)) {
+    if (hints.some((hint) => lower.includes(hint))) {
+      matchedCategory = category;
+      break;
+    }
+  }
+
   const scored = PRODUCT_CATALOG.map((product) => {
-    const haystack = `${product.name} ${product.category}`.toLowerCase();
-    let score = product.rating * 10 + Math.min(product.reviews / 5000, 10);
+    const haystack = `${product.name}`.toLowerCase();
+    let relevanceScore = 0; // Only count actual matches, not base rating
 
+    // Term matching in product name
     for (const term of terms) {
-      if (haystack.includes(term)) score += 18;
+      if (haystack.includes(term)) relevanceScore += 20;
     }
 
-    for (const [category, hints] of Object.entries(categoryHints)) {
-      if (hints.some((hint) => lower.includes(hint)) && product.category === category) score += 24;
+    // Category match
+    if (matchedCategory && product.category === matchedCategory) relevanceScore += 25;
+
+    // Budget bonus
+    if (budget && product.price <= budget) relevanceScore += 15;
+
+    // Only add rating bonus if product is already relevant
+    if (relevanceScore > 0) {
+      relevanceScore += product.rating * 2;
     }
 
-    if (budget && product.price <= budget) score += 22;
-    if (budget && product.price > budget) score -= Math.min((product.price - budget) / 100, 25);
-    if (/(best|top|recommended)/.test(lower)) score += product.rating * 3;
-
-    return { ...product, score };
+    return { ...product, score: relevanceScore };
   })
-    .filter((product) => product.score > 18)
+    .filter((product) => product.score > 0) // Only return actually matching products
     .sort((a, b) => b.score - a.score);
 
   const withinBudget = budget ? scored.filter((product) => product.price <= budget) : scored;
