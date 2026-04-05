@@ -5,16 +5,24 @@ import { useSearch } from "@/context/SearchContext";
 const ProductGrid = ({ title, filter }: { title: string; filter?: string }) => {
   const { searchQuery, activeCategory } = useSearch();
 
+  const isSearching = searchQuery.trim().length > 0;
+
+  // When searching, only show in the "All Products" grid (no filter prop)
+  // to avoid duplicate results across multiple grids
+  if (isSearching && filter) return null;
+
   let filtered = products;
 
-  // Apply category filter from prop or active category
-  const categoryFilter = activeCategory || filter;
-  if (categoryFilter) {
-    filtered = filtered.filter((p) => p.category === categoryFilter);
+  // Apply category filter only when NOT searching
+  if (!isSearching) {
+    const categoryFilter = activeCategory || filter;
+    if (categoryFilter) {
+      filtered = filtered.filter((p) => p.category === categoryFilter);
+    }
   }
 
   // Apply search filter
-  if (searchQuery.trim()) {
+  if (isSearching) {
     const query = searchQuery.toLowerCase();
     filtered = filtered.filter(
       (p) =>
