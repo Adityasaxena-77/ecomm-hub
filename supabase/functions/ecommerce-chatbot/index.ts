@@ -99,13 +99,19 @@ const searchProducts = (message: string) => {
   }
 
   const scored = PRODUCT_CATALOG.map((product) => {
-    const nameLC = product.name.toLowerCase();
+    const nameLC = product.name.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+    const nameTokens = nameLC.split(/\s+/).filter((t) => t.length >= 2);
     let nameMatch = 0;
     let categoryMatch = 0;
 
-    // Term matching in product name (strongest signal)
+    // Term matching: check if search term starts with or is contained in name tokens
     for (const term of terms) {
-      if (nameLC.includes(term)) nameMatch += 25;
+      for (const nt of nameTokens) {
+        if (nt.startsWith(term) || term.startsWith(nt)) {
+          nameMatch += 25;
+          break;
+        }
+      }
     }
 
     // Category match (weaker signal, only adds if name also matches or budget matches)
