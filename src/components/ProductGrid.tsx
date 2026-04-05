@@ -26,7 +26,7 @@ const ProductGrid = ({ title, filter }: { title: string; filter?: string }) => {
   if (filtered.length === 0) return null;
 
   return (
-    <section className="py-8">
+    <section className="py-8" id={filter ? `product-grid-${filter}` : "product-grid"}>
       <div className="container">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground">{title}</h2>

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { bannerSlides } from "@/data/products";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearch } from "@/context/SearchContext";
 
 const HeroBanner = () => {
   const [current, setCurrent] = useState(0);
+  const { setActiveCategory, setSearchQuery } = useSearch();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -15,6 +16,14 @@ const HeroBanner = () => {
 
   const slide = bannerSlides[current];
 
+  const handleCtaClick = () => {
+    setSearchQuery("");
+    setActiveCategory(slide.category);
+    setTimeout(() => {
+      document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   return (
     <section className="hero-gradient relative overflow-hidden">
       <div className="container py-12 md:py-20 flex flex-col items-center text-center relative z-10">
@@ -24,7 +33,7 @@ const HeroBanner = () => {
         <p className="text-lg md:text-xl text-primary-foreground/80 mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
           {slide.subtitle}
         </p>
-        <Button variant="deal" size="lg" className="text-base animate-fade-up" style={{ animationDelay: "0.2s" }}>
+        <Button variant="deal" size="lg" className="text-base animate-fade-up" style={{ animationDelay: "0.2s" }} onClick={handleCtaClick}>
           {slide.cta} →
         </Button>
 
