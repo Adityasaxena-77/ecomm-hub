@@ -99,28 +99,32 @@ const searchProducts = (message: string) => {
   }
 
   const scored = PRODUCT_CATALOG.map((product) => {
-    const haystack = `${product.name}`.toLowerCase();
-    let relevanceScore = 0; // Only count actual matches, not base rating
+    const nameLC = product.name.toLowerCase();
+    let nameMatch = 0;
+    let categoryMatch = 0;
 
-    // Term matching in product name
+    // Term matching in product name (strongest signal)
     for (const term of terms) {
-      if (haystack.includes(term)) relevanceScore += 20;
+      if (nameLC.includes(term)) nameMatch += 25;
     }
 
-    // Category match
-    if (matchedCategory && product.category === matchedCategory) relevanceScore += 25;
+    // Category match (weaker signal, only adds if name also matches or budget matches)
+    if (matchedCategory && product.category === matchedCategory) categoryMatch += 15;
 
     // Budget bonus
-    if (budget && product.price <= budget) relevanceScore += 15;
+    let budgetScore = 0;
+    if (budget && product.price <= budget) budgetScore += 10;
 
-    // Only add rating bonus if product is already relevant
-    if (relevanceScore > 0) {
-      relevanceScore += product.rating * 2;
-    }
+    // Product must have at least a name match OR (category match + budget match)
+    const relevanceScore = nameMatch > 0
+      ? nameMatch + categoryMatch + budgetScore + product.rating * 2
+      : (categoryMatch > 0 && budgetScore > 0)
+        ? categoryMatch + budgetScore + product.rating
+        : 0;
 
     return { ...product, score: relevanceScore };
   })
-    .filter((product) => product.score > 0) // Only return actually matching products
+    .filter((product) => product.score > 0)
     .sort((a, b) => b.score - a.score);
 
   const withinBudget = budget ? scored.filter((product) => product.price <= budget) : scored;
