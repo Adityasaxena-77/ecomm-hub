@@ -50,6 +50,7 @@ const FAQ_CONTEXT = {
   delivery: "Standard delivery usually takes 3 to 7 business days depending on your location.",
   returns: "We offer easy returns within 7 days for eligible products in original condition.",
   payments: "Currently the store supports UPI and Cash on Delivery during checkout.",
+  sales: "We run exciting sales during major festivals! 🎉 Big Billion Days Sale (October), Republic Day Sale (January), Independence Day Sale (August), Diwali Sale (October-November), and End of Season Sale (June & December). You can get up to 50-80% off during these sales. Keep checking our app for flash deals and daily offers too!",
 };
 
 const ORDER_ID_REGEX = /\b[a-f0-9]{8}(?:-[a-f0-9-]{4,27})?\b/i;
@@ -72,6 +73,7 @@ const isFaqQuery = (message: string) => {
   if (/(delivery|shipping|arrive|when.*deliver)/.test(lower)) return "delivery" as const;
   if (/(return|refund|replace|exchange)/.test(lower)) return "returns" as const;
   if (/(payment|upi|cod|cash on delivery|pay)/.test(lower)) return "payments" as const;
+  if (/(sale|offer|discount|deal|kab|festival|coupon|code|promo)/.test(lower)) return "sales" as const;
   return null;
 };
 
