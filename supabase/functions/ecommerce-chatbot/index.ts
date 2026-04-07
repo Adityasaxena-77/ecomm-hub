@@ -73,6 +73,7 @@ const isFaqQuery = (message: string) => {
   if (/(delivery|shipping|arrive|when.*deliver)/.test(lower)) return "delivery" as const;
   if (/(return|refund|replace|exchange)/.test(lower)) return "returns" as const;
   if (/(payment|upi|cod|cash on delivery|pay)/.test(lower)) return "payments" as const;
+  if (/(sale|offer|discount|deal|kab|festival|coupon|code|promo)/.test(lower)) return "sales" as const;
   return null;
 };
 
