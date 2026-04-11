@@ -2,12 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
-import { Heart, Star, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw } from "lucide-react";
+import { Heart, Star, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import { toast } from "sonner";
+import Reviews from "@/components/Reviews";
+import ReviewModal from "@/components/ReviewModal";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -15,6 +17,7 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const [liked, setLiked] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const product = products.find((p) => p.id === Number(id));
 
@@ -104,6 +107,15 @@ const ProductDetail = () => {
                 <span className="text-sm text-muted-foreground">
                   {product.reviews.toLocaleString()} ratings & reviews
                 </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setReviewOpen(true)}
+                  className="ml-auto border border-border hover:bg-secondary"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Write Review
+                </Button>
               </div>
 
               {/* Price */}
@@ -169,6 +181,8 @@ const ProductDetail = () => {
                   Enjoy free delivery, easy returns, and manufacturer warranty with your purchase.
                 </p>
               </div>
+
+              <Reviews productId={product.id} />
             </div>
           </div>
 
@@ -201,6 +215,12 @@ const ProductDetail = () => {
 
       <Footer />
       <CartDrawer />
+      <ReviewModal 
+        product={product} 
+        mode="review"
+        open={reviewOpen} 
+        onOpenChange={setReviewOpen} 
+      />
     </div>
   );
 };

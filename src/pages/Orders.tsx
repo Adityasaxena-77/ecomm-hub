@@ -3,10 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
-import { Package, ArrowLeft, Clock, CheckCircle2, Truck } from "lucide-react";
+import ReviewModal from "@/components/ReviewModal";
+import { Package, ArrowLeft, CheckCircle2, Truck, MapPin, CheckCircle } from "lucide-react";
+import OrderTracking from "@/components/OrderTracking";
+import { Product } from "@/data/products";
 
 interface OrderItem {
   id: string;
@@ -30,17 +34,36 @@ interface Order {
 }
 
 const statusConfig: Record<string, { icon: any; color: string; label: string }> = {
-  confirmed: { icon: CheckCircle2, color: "text-green-600", label: "Confirmed" },
-  processing: { icon: Clock, color: "text-yellow-600", label: "Processing" },
+  placed: { icon: CheckCircle2, color: "text-blue-600", label: "Order Placed" },
+  confirmed: { icon: CheckCircle, color: "text-green-600", label: "Order Confirmed" },
+  packed: { icon: Package, color: "text-yellow-600", label: "Packed" },
   shipped: { icon: Truck, color: "text-blue-600", label: "Shipped" },
-  delivered: { icon: Package, color: "text-green-700", label: "Delivered" },
+  out_for_delivery: { icon: MapPin, color: "text-orange-600", label: "Out for Delivery" },
+  delivered: { icon: CheckCircle, color: "text-green-700", label: "Delivered" },
 };
+
+type ReviewMode = "feedback" | "review";
 
 const Orders = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewMode, setReviewMode] = useState<ReviewMode>("feedback");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const createReviewProduct = (item: OrderItem): Product => ({
+    id: Number(item.id) || 0,
+    name: item.product_name,
+    price: item.price,
+    originalPrice: item.price,
+    discount: 0,
+    rating: 4.5,
+    reviews: 0,
+    image: item.product_image || "https://via.placeholder.com/150",
+    category: "electronics",
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -108,17 +131,47 @@ const Orders = () => {
                     </div>
                   </div>
 
+                  <OrderTracking status={order.order_status} />
+
                   <div className="space-y-3">
                     {order.order_items.map((item) => (
-                      <div key={item.id} className="flex gap-3 items-center">
-                        {item.product_image && (
-                          <img src={item.product_image} alt={item.product_name} className="w-14 h-14 rounded-md object-cover" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground line-clamp-1">{item.product_name}</p>
-                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                      <div key={item.id} className="flex flex-wrap gap-3 items-center justify-between bg-muted/5 rounded-xl p-3">
+                        <div className="flex gap-3 items-center min-w-0 flex-1">
+                          {item.product_image && (
+                            <img src={item.product_image} alt={item.product_name} className="w-14 h-14 rounded-md object-cover" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground line-clamp-1">{item.product_name}</p>
+                            <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          </div>
                         </div>
-                        <span className="text-sm font-bold text-foreground">₹{(item.price * item.quantity).toLocaleString()}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-foreground">₹{(item.price * item.quantity).toLocaleString()}</span>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProduct(createReviewProduct(item));
+                                setReviewMode("feedback");
+                                setReviewOpen(true);
+                              }}
+                            >
+                              Give Feedback
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProduct(createReviewProduct(item));
+                                setReviewMode("review");
+                                setReviewOpen(true);
+                              }}
+                            >
+                              Write Review
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -133,6 +186,14 @@ const Orders = () => {
           </div>
         )}
       </main>
+      {selectedProduct && (
+        <ReviewModal
+          product={selectedProduct}
+          mode={reviewMode}
+          open={reviewOpen}
+          onOpenChange={(open) => setReviewOpen(open)}
+        />
+      )}
       <Footer />
       <CartDrawer />
     </div>

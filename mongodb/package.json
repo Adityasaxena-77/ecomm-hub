@@ -1,0 +1,38 @@
+{
+  "name": "ecommerce-mongodb-scripts",
+  "version": "1.0.0",
+  "description": "MongoDB management scripts for E-commerce application",
+  "main": "index.js",
+  "scripts": {
+    "init": "node scripts/init-db.js",
+    "export": "node scripts/export-data.js",
+    "import": "node scripts/import-data.js",
+    "cleanup": "node scripts/cleanup.js",
+    "monitor": "node scripts/monitor.js",
+    "backup": "node utils/backup-restore.js backup",
+    "restore": "node utils/backup-restore.js restore",
+    "seed": "node seeds/seed.js",
+    "migrate": "node migrations/001_initial_migration.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.0.0",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "keywords": [
+    "mongodb",
+    "ecommerce",
+    "database",
+    "scripts",
+    "backup",
+    "migration"
+  ],
+  "author": "E-commerce Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

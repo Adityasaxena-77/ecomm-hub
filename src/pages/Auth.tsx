@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -13,28 +12,8 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [forgotPassword, setForgotPassword] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Please enter your email");
-      return;
-    }
-    setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Password reset link sent! Check your email.");
-      setForgotPassword(false);
-    }
-    setLoading(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,104 +63,80 @@ const Auth = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-card rounded-xl card-shadow p-8">
           <h1 className="text-2xl font-heading font-bold text-foreground text-center mb-2">
-            {forgotPassword ? "Reset Password" : isLogin ? "Welcome Back!" : "Create Account"}
+            {isLogin ? "Welcome Back!" : "Create Account"}
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            {forgotPassword
-              ? "Enter your email to receive a reset link"
-              : isLogin
-              ? "Login to access your account"
-              : "Sign up to start shopping"}
+            {isLogin ? "Login to access your account" : "Sign up to start shopping"}
           </p>
 
-          {forgotPassword ? (
-            <form onSubmit={handleForgotPassword} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Full Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className="pl-10"
-                  required
+                  required={!isLogin}
                 />
               </div>
-              <Button variant="hero" size="lg" className="w-full" type="submit" disabled={loading}>
-                {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
+            )}
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="email"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10"
+                required
+              />
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10"
+                required
+                minLength={6}
+              />
+            </div>
+
+            {isLogin && (
               <button
                 type="button"
-                onClick={() => setForgotPassword(false)}
-                className="text-sm text-primary hover:underline w-full text-center block mt-2"
+                onClick={() => navigate("/reset-password")}
+                className="text-sm text-primary hover:underline w-full text-right"
               >
-                Back to Login
+                Forgot Password?
               </button>
-            </form>
-          ) : (
-            <>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Full Name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="pl-10"
-                      required={!isLogin}
-                    />
-                  </div>
-                )}
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                    minLength={6}
-                  />
-                </div>
+            )}
 
-                {isLogin && (
-                  <button
-                    type="button"
-                    onClick={() => setForgotPassword(true)}
-                    className="text-sm text-primary hover:underline w-full text-right"
-                  >
-                    Forgot Password?
-                  </button>
-                )}
+            <Button variant="hero" size="lg" className="w-full" type="submit" disabled={loading}>
+              {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
+            </Button>
+          </form>
 
-                <Button variant="hero" size="lg" className="w-full" type="submit" disabled={loading}>
-                  {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
-                </button>
-              </div>
-            </>
-          )}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setEmail("");
+                  setPassword("");
+                  setFullName("");
+                }}
+                className="text-primary hover:underline font-medium"
+              >
+                {isLogin ? "Sign up" : "Login"}
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
