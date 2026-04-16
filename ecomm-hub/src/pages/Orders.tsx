@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ReviewModal from "@/components/ReviewModal";
-import { Package, ArrowLeft, CheckCircle2, Truck, MapPin, CheckCircle } from "lucide-react";
+import { Package, ArrowLeft, CheckCircle2, Truck, MapPin, CheckCircle, RotateCcw } from "lucide-react";
 import OrderTracking from "@/components/OrderTracking";
 import { Product } from "@/data/products";
 
@@ -40,6 +40,7 @@ const statusConfig: Record<string, { icon: any; color: string; label: string }> 
   shipped: { icon: Truck, color: "text-blue-600", label: "Shipped" },
   out_for_delivery: { icon: MapPin, color: "text-orange-600", label: "Out for Delivery" },
   delivered: { icon: CheckCircle, color: "text-green-700", label: "Delivered" },
+  return_requested: { icon: RotateCcw, color: "text-orange-600", label: "Return Requested" },
 };
 
 type ReviewMode = "feedback" | "review";
@@ -74,23 +75,52 @@ const Orders = () => {
   }, [user, authLoading]);
 
   const fetchOrders = async () => {
-    const { data: ordersData } = await supabase
+    setLoading(true);
+    const { data: ordersData, error: ordersError } = await supabase
       .from("orders")
       .select("*")
+      .eq("user_id", user.id)
+      .neq("order_status", "cancelled")
       .order("created_at", { ascending: false });
+
+    if (ordersError) {
+      console.error("Fetch orders error:", ordersError);
+      toast.error("Failed to load orders");
+      setLoading(false);
+      return;
+    }
 
     if (ordersData) {
       const ordersWithItems: Order[] = [];
       for (const order of ordersData) {
-        const { data: items } = await supabase
+        const { data: items, error: itemsError } = await supabase
           .from("order_items")
           .select("*")
           .eq("order_id", order.id);
+        if (itemsError) {
+          console.error("Fetch order items error:", itemsError);
+          toast.error("Failed to load order items");
+          continue;
+        }
         ordersWithItems.push({ ...order, order_items: items || [] });
       }
       setOrders(ordersWithItems);
     }
     setLoading(false);
+  };
+
+  const returnOrder = async (orderId: string) => {
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ order_status: "return_requested" })
+        .eq("id", orderId);
+      if (error) throw error;
+      toast.success("Return request submitted successfully");
+      fetchOrders();
+    } catch (error) {
+      toast.error("Failed to submit return request");
+    }
   };
 
   return (
@@ -132,6 +162,14 @@ const Orders = () => {
                   </div>
 
                   <OrderTracking status={order.order_status} />
+
+                  <div className="flex gap-2 mt-4">
+                    {order.order_status === "delivered" && (
+                      <Button variant="outline" size="sm" onClick={() => returnOrder(order.id)}>
+                        Return Order
+                      </Button>
+                    )}
+                  </div>
 
                   <div className="space-y-3">
                     {order.order_items.map((item) => (
