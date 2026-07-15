@@ -41,38 +41,64 @@ const reverseGeocode = async (latitude: number, longitude: number): Promise<Reso
   };
 };
 
+const ipFallbackLocation = async (): Promise<ResolvedLocation> => {
+  const res = await fetch("https://ipapi.co/json/");
+  if (!res.ok) throw new Error("Could not detect location via IP");
+  const d = await res.json();
+  if (!d.latitude || !d.longitude) throw new Error("Could not detect location via IP");
+  return {
+    address: [d.city, d.region, d.country_name].filter(Boolean).join(", ") || "Approximate location",
+    city: d.city || "",
+    state: d.region || "",
+    pincode: d.postal || "",
+    latitude: d.latitude,
+    longitude: d.longitude,
+  };
+};
+
 export const useCurrentLocation = () => {
   const [loading, setLoading] = useState(false);
 
   const getCurrentLocation = async () => {
-    if (!("geolocation" in navigator)) {
-      throw new Error("Geolocation is not supported on this device");
-    }
-
     setLoading(true);
 
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        });
-      });
-
-      return await reverseGeocode(position.coords.latitude, position.coords.longitude);
-    } catch (error) {
-      if (error instanceof GeolocationPositionError) {
-        if (error.code === error.PERMISSION_DENIED) {
-          throw new Error("Location permission denied. Please allow location access.");
-        }
-
-        if (error.code === error.TIMEOUT) {
-          throw new Error("Location request timed out. Please try again.");
+      // Try browser GPS first
+      if ("geolocation" in navigator) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 8000,
+              maximumAge: 60000,
+            });
+          });
+          try {
+            return await reverseGeocode(position.coords.latitude, position.coords.longitude);
+          } catch {
+            return {
+              address: "Current location selected",
+              city: "",
+              state: "",
+              pincode: "",
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+          }
+        } catch (gpsErr) {
+          // GPS denied/blocked (common in preview iframe) — fall back to IP
+          try {
+            return await ipFallbackLocation();
+          } catch {
+            const code = (gpsErr as GeolocationPositionError)?.code;
+            if (code === 1) throw new Error("Location permission blocked. Allow location in browser settings, or open the app in a new tab.");
+            if (code === 3) throw new Error("Location request timed out. Please try again.");
+            throw new Error("Could not get your current location");
+          }
         }
       }
-
-      throw error instanceof Error ? error : new Error("Could not get your current location");
+      // No geolocation API — IP fallback
+      return await ipFallbackLocation();
     } finally {
       setLoading(false);
     }
